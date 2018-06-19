@@ -94,8 +94,8 @@ def randomizedSVD(X, r, rEst, nPower = 1, seed, opts=[]):
 	U = Q*U
 	V=V*VV
 
-	U = U(:, 0:r)
-	V = V(:, 0:r)
-	S = S(0:r, 0:r)
+	U = U[:, 0:r]
+	V = V[:, 0:r]
+	S = S[0:r, 0:r]
 
 	return U, S, V

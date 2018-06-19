@@ -92,7 +92,7 @@ def solver_RPCA_constrained(AY, lambda_S, tau, A_cell, opts=[]):
 		return out
 
 	if len(locals()) < 4 or A_cell.isEmpty:
-		A = lambda X : X(:)
+		A = lambda X : X[:]
 		n1, n2 = AY.shape
 		At = lambda x: np.reshape(x, (n1, n2))
 	else:
@@ -110,7 +110,7 @@ def solver_RPCA_constrained(AY, lambda_S, tau, A_cell, opts=[]):
 			n1 = sz[0]
 			n2 = sz[1]
 
-	normAY = np.linalg.norm(AY(:))
+	normAY = np.linalg.norm(AY[:])
 
 	SMALL = (n1*n2 <= 50**2)
 	MEDIUM = (n1*n2 <= 200**2) and not SMALL 
@@ -281,7 +281,7 @@ def solver_RPCA_constrained(AY, lambda_S, tau, A_cell, opts=[]):
 
 		R = A(L+S) - AY
 
-		res = np.linalg.norm(R(:))
+		res = np.linalg.norm(R[:])
 		errHist(k, 1) = res
 		errHist(k, 2) = 1/2*(res**2)
 		if Lagranian:
@@ -289,23 +289,23 @@ def solver_RPCA_constrained(AY, lambda_S, tau, A_cell, opts=[]):
 
 			if LIL2 > 0:
 				if LIL2 == 'rows':
-					errHist(k, 2) = errHist(k, 2) + lamda*lambda_S*np.sum(np.sqrt(np.sum(np.power(S, 2), 2)))
+					errHist[k, 2] = errHist[k, 2] + lamda*lambda_S*np.sum(np.sqrt(np.sum(np.power(S, 2), 2)))
 				else:
-					errHist(k, 2) = errHist(k, 2) + lamda*lambda_S*np.sum(np.sqrt(np.sum(np.power(S, 1), 2)))
+					errHist[k, 2] = errHist[k, 2] + lamda*lambda_S*np.sum(np.sqrt(np.sum(np.power(S, 1), 2)))
 			else:
-				errHist(k, 2) = errHist(k, 2) + lamda*lambda_S*np.linalg.norm(S(:), 1)
+				errHist[k, 2] = errHist[k, 2] + lamda*lambda_S*np.linalg.norm(S[:], 1)
 
-		if k > 1 and math.abs(np.diff(errHist(k+1:k, 1)))/res < tol:
+		if k > 1 and math.abs(np.diff(errHist[k+1:k, 1]))/res < tol:
 			BREAK = true
 
 		PRINT = not np.mod(k, printEvery) or BREAK or DO_RESTART
 
 		if PRINT:
-			print("Iter %4d, rel. residual %.2e, objective %.2e", k, res/normAY, errHist(k, 2) -trueObj)
+			print("Iter %4d, rel. residual %.2e, objective %.2e", k, res/normAY, errHist[k, 2] -trueObj)
 
 		if not errFcn:
-			err = errFcn(L, S)
-			errHist(k, 3)
+			err = errFcn[L, S]
+			errHist[k, 3]
 			if PRINT:
 				print("err %.2e", err)
 
@@ -329,7 +329,7 @@ def solver_RPCA_constrained(AY, lambda_S, tau, A_cell, opts=[]):
 			print("Reached stopping criteria (Based on change in residual)\n")
 
 	if BREAK:
-		errHist = errHist(1:k, :)
+		errHist = errHist[1:k, :]
 	else:
 		print("Reached maximum number of allowed iterations\n")
 
@@ -430,9 +430,9 @@ def projNuclear(tau, X, SVDopts):
 
 		tt = s > 0
 		rEst = np.count_nonzero(tt)
-		U = U(:,tt)
+		U = U[:,tt]
 		S = np.diag(s(tt))
-		V = V(:,tt)
+		V = V[:,tt]
 		nrm = np.sum(s(tt))
 	else if style == 2 or style == 3 or style == 4:
 		if style ==2:
@@ -482,8 +482,8 @@ def projNuclear(tau, X, SVDopts):
 
 		rEst = math.min(len(numpy.where(s>lamda)), rankMax)
 		S = np.diag(s(1:rEst)-lamda)
-		U = U(:,1:rEst)
-		V = V(:,1:rEst)
+		U = U[:,1:rEst]
+		V = V[:,1:rEst]
 		nrm = np.sum(s(1:rEst) - lamda)
 	else:
 		print("bad value for SVDstyle")
@@ -549,7 +549,7 @@ def projectSum(tau, lambda_S, L, S):
 	proj = project_l1(tau, wts)
 	sS = proj([s;vec(S)])
 	sProj = sS(1:len(s))
-	S = np.reshape(sS(len(s)+1: end), (m, n))
+	S = np.reshape(sS[len(s)+1: end], (m, n))
 	L = U*np.diag(sProj)*V
 	rnk = np.count_nonzero(sProj)
 	nuclearNorm = np.sum(sProj)
@@ -558,9 +558,9 @@ def projectSum(tau, lambda_S, L, S):
 
 def compute_BB_stepsize(Grad, Grad_old, L, L_old, S, S_old, BB_split, BB_type):
 	if not BB_split:
-		yk = np.subtract(Grad(:), Grad_old(:))
+		yk = np.subtract(Grad[:], Grad_old[:])
 		yk = [yk;yk]
-		sk = [np.subtract(L(:), L_old(:)); np.subtract(S(:), S_old(:))]
+		sk = [np.subtract(L[:], L_old[:]); np.subtract(S[:], S_old[:])]
 		if BB_type == 1:
 			stepsize = np.linalg.norm(sk**2)/(np.transpose(sk) * yk)
 		else if BB_type == 2:
@@ -570,9 +570,9 @@ def compute_BB_stepsize(Grad, Grad_old, L, L_old, S, S_old, BB_split, BB_type):
 		stepsizeS = stepsize
 
 	else if BB_split:
-		yk = np.subtract(Grad(:), Grad_old(:))
-		skL = np.subtract(L(:), L_old(:))
-		skS = np.subtract(S(:), S_old(:))
+		yk = np.subtract(Grad[:], Grad_old[:])
+		skL = np.subtract(L[:], L_old[:])
+		skS = np.subtract(S[:], S_old[:])
 		if BB_type == 1:
 			stepsizeL = (np.linalg.norm(skL)**2)/(np.transpose(skL)*yk)
 			stepsizeS = (np.linalg.norm(skS)**2)/(np.transpose(skS)*yk)
@@ -630,7 +630,7 @@ def project_l1(q, d):
 				print("[RPCA_c : proj_l1_q] You must modify this code to deal with tensors")
 				return
 			myReshape = lambda y : np.reshape(y, x.shape(0), x.shape(1))
-			x = x(:)
+			x = x[:]
 
 		s = np.sort(math.abs(np.zeros(x)))
 		cs = np.cumsum(s)

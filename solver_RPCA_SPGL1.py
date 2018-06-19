@@ -81,7 +81,7 @@ def solver_RPCA_SPGL1(AY, lambda_S, epsilon, A_cell, opts):
 		return out
 
 	if len(locals()) < 4 or A_cell.isEmpty:
-		A = lambda X: X(:)
+		A = lambda X: X[:]
 		n1, n2 = AY.shape
 		At = lambda x : np.reshape(x, (n1, n2))
 	else:
@@ -112,7 +112,7 @@ def solver_RPCA_SPGL1(AY, lambda_S, epsilon, A_cell, opts):
 	finalTol = setOpts('tol', math.exp(-6))
 	sumProject = setOpts('sum', false)
 	maxProject = setOpts('max', false)
-	if sumProject && maxProject || not sumProject && not maxProject:
+	if sumProject and maxProject or not sumProject and not maxProject:
 		print("Must choose either sum or max type projection")
 		return
 	opts[max] = maxProject
@@ -130,7 +130,7 @@ def solver_RPCA_SPGL1(AY, lambda_S, epsilon, A_cell, opts):
 
 		errHist = errHist + errHistTemp
 
-		rNorm = errHist(end, 1)
+		rNorm = errHist[end, 1]
 
 		if math.abs(epsilon -rNorm) < SPGL1_tol*epsilon:
 			print("reached end of SPGL1 iterations: converged to right residual")
@@ -143,10 +143,10 @@ def solver_RPCA_SPGL1(AY, lambda_S, epsilon, A_cell, opts):
 		G = At(A(L+S-AY))
 
 		if sumProject:
-			normG = math.max(np.linalg.norm(G), (1/lambda_S)*np.linalg.norm(G(:), inf))
+			normG = math.max(np.linalg.norm(G), (1/lambda_S)*np.linalg.norm(G[:], inf))
 		else if maxProject:
 			if not any(LIL2):
-				normG = np.linalg.norm(G) + (1/lambda_S)*np.linalg.norm(G(:), inf)
+				normG = np.linalg.norm(G) + (1/lambda_S)*np.linalg.norm(G[:], inf)
 			else if LIL2 == 'rows':
 				normG = np.linalg.norm(G) + (1/lambda_S)*np.linalg.norm(math.sqrt(np.sum(np.power(G, 2), axis=1), inf))
 			else if LIL2 == 'cols':

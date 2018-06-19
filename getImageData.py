@@ -19,10 +19,10 @@ def getImageData(imageFolder, *args):
 
 	imageDirectory = os.listdir(imageFolder)
 
-	for x in range(1, len(imageDirectory)):
+	for x in range(0, len(imageDirectory)):
 		temp = rgb2gray(mpimg.imread(imageFolder + '\\' + imageDirectory(x).name))
 		temp.asType(np.int8)
-		X(:,q) = temp(:) #LOOK INTO THIS
+		X[:,q] = temp[:] #LOOK INTO THIS
 
 	r, c = temp.shape
 	return X, r, c
