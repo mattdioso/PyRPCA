@@ -15,7 +15,7 @@ def get_setInfo(filePath, defName="setInfo.txt"):
 			print("Multiple .txt files exist in %s. Opening setInfo.txt", filePath)
 			cpfn = filePath + '\setInfo.txt'
 		else:
-			cpfn = filePath + txtList(1).name 
+			cpfn = filePath + txtList[1].name 
 	else:
 		cpfn = filePath + '\\' + defName
 

@@ -37,7 +37,7 @@ with open(emptyFolderListFile, "w") as out:
 
 #Create temporal sets
 for i in range(0, numFolders):
-	folderName = folderList(i).name 
+	folderName = folderList[i].name 
 
 	if not os.listdir(os.path.join(OUTPUT_MAIN_FOLDER_NAME, folderName, SET_INFO_TEXT_FILE_NAME)):
 		print("\nCreating Sets\nFolder: %s\n(%d out of %d)\n", folderName, f, numFolders)
@@ -50,7 +50,7 @@ for i in range(0, numFolders):
 				wrtier.writerow([val])
 
 for i in range(0, numFolders):
-	folderName = foderList(i).name
+	folderName = foderList[i].name
 	directoryOfSets = os.listdir(os.path.join(OUTPUT_MAIN_FOLDER_NAME, folderName, 'Set_*'))
 	for x in range(0, len(directoryOfSets)):
 		thisSet = directoryOfSets[x]

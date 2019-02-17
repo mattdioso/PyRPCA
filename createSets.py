@@ -18,22 +18,22 @@ def createSets(folder):
 
 	rejectedIm = []
 	for i in range(0, numIm):
-		if fileList(i).bytes > 0:
+		if fileList[i].bytes > 0:
 			try:
-				timeVecCurrent(i) = time.ctime(os.path.getmtime(os.path.join(INPUT_MAIN_FOLDER_NAME, fileList(i).name)))
+				timeVecCurrent[i] = time.ctime(os.path.getmtime(os.path.join(INPUT_MAIN_FOLDER_NAME, fileList(i).name)))
 			except OSError as e:
-				timeVecCurrent(i) = float('nan')
+				timeVecCurrent[i] = float('nan')
 				rejectedIm = os.path.join(rejectedIm, i)
-				print("rejected image: %s (i=%d)\n", fileList(i), i)
+				print("rejected image: %s (i=%d)\n", fileList[i], i)
 		else:
 			rejectedIm = [rejectedIm i]
-			timeVecCurrent(i) = float('nan')
-			print("rejected image: %s (i=%d)\n", fileList(i), i)
+			timeVecCurrent[i] = float('nan')
+			print("rejected image: %s (i=%d)\n", fileList[i], i)
 
-	fileList(rejectedIm)= []
-	timeVecCurrent(rejectedIm) = []
+	fileList[rejectedIm]= []
+	timeVecCurrent[rejectedIm] = []
 	sortedTime, index = np.sort(timeVecCurrent)
-	fileList = fileList(index)
+	fileList = fileList[index]
 	numIm = len(fileList)
 
 	timeVecPrevious = numpy.zeros(6)
@@ -41,6 +41,6 @@ def createSets(folder):
 	k = 0
 
 	for i in range(0, numIm):
-		if setInfo(i) == 0
+		if setInfo[i] == 0
 
 		imInfo = 

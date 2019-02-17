@@ -162,10 +162,10 @@ def solver_RPCA_constrained(AY, lambda_S, tau, A_cell, opts=[]):
 		if sumProject:
 			print("cannot run quasi-newton mode when in 'sum' formulation. Please change to 'max'")
 			return
-		else if FISTA:
+		elif FISTA:
 			print("Cannot run quasi-newton with FISTA")
 			return
-		else if BB:
+		elif BB:
 			print("Cannot run quasi-newton with BB")
 			return
 
@@ -176,7 +176,7 @@ def solver_RPCA_constrained(AY, lambda_S, tau, A_cell, opts=[]):
 	if LIL2:
 		if LIL2.lower().find('row'):
 			LIL2 = 'rows'
-		else if LIL.lower().find('col'):
+		elif LIL.lower().find('col'):
 			LIL2 = 'cols'
 		else:
 			print("unrecognized option for LIL2: should be row or column or 0")
@@ -185,12 +185,12 @@ def solver_RPCA_constrained(AY, lambda_S, tau, A_cell, opts=[]):
 	projNuclear()
 	if maxProject:
 		project = lambda L, S, *args : projectMax(LIL2, tau, lambda_S, SVDopts, L, S)
-	else if sumProject:
+	elif sumProject:
 		if LIL2 > 0:
 			print("error with opts[sum] = true, need opts[LIL2] =0")
 			return
 		project = lambda L, S, *args : projectSum(tau, lambda_S, L, S)
-	else if Lagranian:
+	elif Lagranian:
 		project = lambda L, S, *args : projectMax(LIL2, lamda, lamda*lambda_S, SVDopts, L, S, *args)
 
 	L = setOpts('L0', np.zeros(n1, n2))
@@ -203,7 +203,7 @@ def solver_RPCA_constrained(AY, lambda_S, tau, A_cell, opts=[]):
 		return
 
 	stepsize = 1/Lip
-	errHist = np.zeros(maxIts, 2 + not errFcn)
+	errHist = np.zeros(maxIts, 2 + (not errFcn))
 	Grad = 0
 
 	if FISTA or BB or QUASINEWTON:
@@ -266,7 +266,7 @@ def solver_RPCA_constrained(AY, lambda_S, tau, A_cell, opts=[]):
 			if k>1 and restart > 0 and not np.isinf(restart) and not np.mod(kk, restart):
 				kk=0
 				DO_RESTART = true
-			else if restart == float("-inf") && kk > 5:
+			elif restart == float("-inf") and kk > 5:
 				if (errHist(k-1, 2) - errHist(k-5, 2)) > math.exp(-8) * math.abs(errHist(k-5, 2)):
 					DO_RESTART = true
 					kk=0
@@ -282,10 +282,10 @@ def solver_RPCA_constrained(AY, lambda_S, tau, A_cell, opts=[]):
 		R = A(L+S) - AY
 
 		res = np.linalg.norm(R[:])
-		errHist(k, 1) = res
-		errHist(k, 2) = 1/2*(res**2)
+		errHist[k, 1] = res
+		errHist[k, 2] = 1/2*(res**2)
 		if Lagranian:
-			errHist(k, 2) = errHist(k, 2) + lamda*objL
+			errHist[k, 2] = errHist[k, 2] + lamda*objL
 
 			if LIL2 > 0:
 				if LIL2 == 'rows':
@@ -357,9 +357,9 @@ def projectMax(LIL2, tau, lambda_S, SVDopts, L, S, stepsize, stepsizeS):
 		if tauS > 0:
 			if LIL2 > 0:
 				projS = project_l1(tauS)
-			else if LIL2 == 'rows':
+			elif LIL2 == 'rows':
 				projS = project_l1l2(tauS, true)
-			else if LIL2 == 'cols':
+			elif LIL2 == 'cols':
 				projS = project_l1l2(tauS, false)
 			else:
 				print("bad value for LIL2: should be [], 'rows', or 'cols'")
@@ -368,10 +368,10 @@ def projectMax(LIL2, tau, lambda_S, SVDopts, L, S, stepsize, stepsizeS):
 	else:
 		if LIL2 > 0:
 			S = np.multiply(np.sign(S), math.max(0, math.abs(S) - math.abs(tauS)))
-		else if LIL2 == 'rows':
+		elif LIL2 == 'rows':
 			projS = prox_l1l2(math.abs(tauS))
 			S = projS(S, 1)
-		else if LIL2 == 'cols':
+		elif LIL2 == 'cols':
 			projS = prox_l1l2(math.abs(tauS))
 			S = projS(numpy.matrix.traspose(S), 1)
 		else:
@@ -408,7 +408,7 @@ def projNuclear(tau, X, SVDopts):
 
 	if iteration == 1:
 		rankMax = int(round(minN/4))
-	else if iteration ==2:
+	elif iteration ==2:
 		rankMax = int(round(minN/2))
 	else:
 		rankMax = minN
@@ -434,19 +434,19 @@ def projNuclear(tau, X, SVDopts):
 		S = np.diag(s(tt))
 		V = V[:,tt]
 		nrm = np.sum(s(tt))
-	else if style == 2 or style == 3 or style == 4:
+	elif style == 2 or style == 3 or style == 4:
 		if style ==2:
 			opts = {'tol' : math.exp(-4)}
 			if rankMax == 1:
 				opts[tol] = math.min(opts[tol], math.exp(-6))
 			svdFcn = lambda X, rEst : numpy.sparse.linalg.svds(X, rEst, 'L', opts)
-		else if style == 3:
-			opts = {'tol' : math.exp(-4), 'eta', np.spacing(1)}
+		elif style == 3:
+			opts = {'tol' : math.exp(-4), 'eta' : np.spacing(1)}
 			opts[delta] = 10*opts[eta]
 			if rankMax == 1:
 				opts[tol] = math.min(opts[tol], math.exp(-6))
 			svdFcn = lambda X, rEst : lansvd(X, rEst, 'L', opts) #PROBABLY NEED TO IMPLEMENT LANSVD
-		else if style == 4:
+		elif style == 4:
 			opts = []
 			if 'nPower' in SVDopts and SVDopts[nPower]:
 				nPower = SVDopts[nPower]
@@ -481,10 +481,10 @@ def projNuclear(tau, X, SVDopts):
 			rEst = 2*rEst
 
 		rEst = math.min(len(numpy.where(s>lamda)), rankMax)
-		S = np.diag(s(1:rEst)-lamda)
+		S = np.diag(s[1:rEst]-lamda)
 		U = U[:,1:rEst]
 		V = V[:,1:rEst]
-		nrm = np.sum(s(1:rEst) - lamda)
+		nrm = np.sum(s[1:rEst] - lamda)
 	else:
 		print("bad value for SVDstyle")
 		return
@@ -513,7 +513,7 @@ def project_simplex(q, x):
 	if q < np.spacing(s(1)):
 		print("Input is scaled so large compared to q that accurate computations are difficult")
 
-	cs = np.divide((np.cumsum(s) - 1), (np.transpose(1:len(s)))) # CHECK THIS
+	cs = np.divide((np.cumsum(s) - 1), (np.transpose(len(s)))) # CHECK THIS
 	ndx = np.count_nonzero(s>cs)
 	x = math.max(x - cs(ndx), 0)
 
@@ -521,7 +521,7 @@ def project_simplex(q, x):
 
 def findTau(s, lamda):
 
-	if np.all(s==0) or lamda = 0:
+	if np.all(s==0) or lamda == 0:
 		tau=0
 		return tau
 
@@ -529,13 +529,13 @@ def findTau(s, lamda):
 		print("s should be a vector, not a matrix")
 		return
 
-	if sorted(np.flipud(s)) not flipud(s):
+	if not sorted(np.flipud(s)): #not flipud(s):
 		s = np.sort(s)
 
 	if (s<0):
 		print("s should be non-negative")
 
-	cs = np.divide((np.cumsum(s) - math.abs(lamda)), (1:len(s))) #CHECK THIS
+	cs = np.divide((np.cumsum(s) - math.abs(lamda)), len(s))#(1:len(s))) #CHECK THIS
 	ndx = np.count_nonzero(s > cs)
 	tau = math.max(0, cs(ndx))
 
@@ -545,10 +545,10 @@ def projectSum(tau, lambda_S, L, S):
 	m, n = L.shape
 	U, Sigma, V = np.linalg.svd(L, 'econ')
 	s = np.diag(Sigma)
-	wts = [np.ones(len(s), 1); lambda_S*np.ones(m*n, 1)]
+	wts = [np.ones(len(s), 1), lambda_S*np.ones(m*n, 1)] #LOOK INTO CONCATENATING ARRAYS INTO MATRICES
 	proj = project_l1(tau, wts)
-	sS = proj([s;vec(S)])
-	sProj = sS(1:len(s))
+	sS = proj([s, vec(S)])
+	sProj = sS[1:len(s)]
 	S = np.reshape(sS[len(s)+1: end], (m, n))
 	L = U*np.diag(sProj)*V
 	rnk = np.count_nonzero(sProj)
@@ -559,24 +559,24 @@ def projectSum(tau, lambda_S, L, S):
 def compute_BB_stepsize(Grad, Grad_old, L, L_old, S, S_old, BB_split, BB_type):
 	if not BB_split:
 		yk = np.subtract(Grad[:], Grad_old[:])
-		yk = [yk;yk]
-		sk = [np.subtract(L[:], L_old[:]); np.subtract(S[:], S_old[:])]
+		yk = [yk, yk]
+		sk = [np.subtract(L[:], L_old[:]), np.subtract(S[:], S_old[:])]
 		if BB_type == 1:
 			stepsize = np.linalg.norm(sk**2)/(np.transpose(sk) * yk)
-		else if BB_type == 2:
+		elif BB_type == 2:
 			stepsize = np.transpose(sk) * yk / (np.linalg.norm()**2)
 
 		stepsizeL = stepsize
 		stepsizeS = stepsize
 
-	else if BB_split:
+	elif BB_split:
 		yk = np.subtract(Grad[:], Grad_old[:])
 		skL = np.subtract(L[:], L_old[:])
 		skS = np.subtract(S[:], S_old[:])
 		if BB_type == 1:
 			stepsizeL = (np.linalg.norm(skL)**2)/(np.transpose(skL)*yk)
 			stepsizeS = (np.linalg.norm(skS)**2)/(np.transpose(skS)*yk)
-		else if BB_type == 2:
+		elif BB_type == 2:
 			stepsizeL = (np.transpose(skL)*yk)/(np.linalg.norm(yk)**2)
 			stepsizeS = (np.transpose(skS)*yk)/(np.linalg.norm(yk)**2)
 
@@ -605,7 +605,7 @@ def project_l1(q, d):
 
 	if len(locals()) == 0:
 		q = 1
-	else if not q.isnumeric() or not np.isreal(q) or size(q) != 1 or q<=0:
+	elif not q.isnumeric() or not np.isreal(q) or size(q) != 1 or q<=0:
 		print("[RPCA_c: projl1] Argument must be positive")
 		return
 
@@ -614,7 +614,7 @@ def project_l1(q, d):
 			if d == 0:
 				print("[RPCA_c: projl1] if d==0 in proj_l1, the set is just {0}, so use proj_0")
 				return
-			else if d < 0:
+			elif d < 0:
 				print("[RPCA_c: projl1] Require d >= 0")
 			q=q/d
 		op = lambda *args : proj_l1_q(q, *args)
@@ -634,7 +634,7 @@ def project_l1(q, d):
 
 		s = np.sort(math.abs(np.zeros(x)))
 		cs = np.cumsum(s)
-		ndx = np.nonzero(np.multiply(cs-np.transpose(1:size(s)), [s:1:end; 0] >= q+2*np.spacing(q-1))) #CHECK THIS
+		ndx = np.nonzero(np.multiply(cs-np.transpose(size(s)), [s[1:end], 0] >= q+2*np.spacing(q-1))) #CHECK THIS
 		if not ndx:
 			thresh = ( cs(ndx) - q) / ndx
 			x = np.multiply(x, 1 - (np.divide(thresh, math.max(math.abs(x), thresh))))
@@ -648,7 +648,7 @@ def project_l1(q, d):
 				print("[RPCA_c : proj_l1_q] You must modify this code to deal with tensors")
 				return
 			myReshape = lambda y : np.reshape(y, x.shape(0), x.shape(1))
-			x = x(:)
+			x = x[:]
 
 		goodInd, j, xOverD = np.nonzero(np.divide(x, d))
 		lambdas, srt = np.sort(math.abs(xOverD)) #LOOK INTO DESCENDING SORT
@@ -682,7 +682,7 @@ def project_l1l2(q = 1, rowNorms = true):
 		s = sort(nrms)
 		cs = np.cumsum(s)
 
-		ndx = np.nonzero(np.multiply(cs - np.transpose(1:size(s)), [s(1:end); 0] >= tau+2*np.spacing(tau-1)))
+		ndx = np.nonzero(np.multiply(cs - np.transpose(size(s)), [s[1:end], 0] >= tau+2*np.spacing(tau-1)))
 
 		if not ndx:
 			thresh = (cs(ndx) - tau) / ndx
@@ -698,7 +698,7 @@ def project_l1l2(q = 1, rowNorms = true):
 		s = np.sort(nrms)
 		cs = np.cumsum(s)
 
-		ndx = np.nonzero(np.multiply(cs - np.transpose(1:size(s)), [s(1:end); 0] >= tau+2*np.spacing(tau-1)))
+		ndx = np.nonzero(np.multiply(cs - np.transpose(size(s)), [s[1:end], 0] >= tau+2*np.spacing(tau-1)))
 		if not ndx:
 			thresh = (cs(ndx) - tau)/ ndx
 			d = math.max(0, 1-np.divide(thresh, nrms))

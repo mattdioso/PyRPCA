@@ -8,7 +8,7 @@ from globalVariables import *
 def rgb2gray(rgb):
 	return np.dot(rgb[...,:3], [0.299, 0.587, 0.114])
 
-def getImageData(imageFolder, *args):
+def getImageData(imageFolder, ext='JPG'):
 	if len(locals()) < 2:
 		ext='JPG'
 	else:
@@ -20,7 +20,7 @@ def getImageData(imageFolder, *args):
 	imageDirectory = os.listdir(imageFolder)
 
 	for x in range(0, len(imageDirectory)):
-		temp = rgb2gray(mpimg.imread(imageFolder + '\\' + imageDirectory(x).name))
+		temp = rgb2gray(mpimg.imread(imageFolder + '\\' + imageDirectory[x].name))
 		temp.asType(np.int8)
 		X[:,q] = temp[:] #LOOK INTO THIS
 
